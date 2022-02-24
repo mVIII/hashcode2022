@@ -25,7 +25,7 @@ type Project struct {
 	Deadline             int
 	Skills               []*Skill
 	Contributors         map[string]*Person
-	PossibleContributors []*Person
+	PossibleContributors map[string]*Person
 	Working              bool
 }
 
@@ -88,13 +88,14 @@ func main() {
 				}
 
 				currProject = &Project{
-					Name:         words[0],
-					Days:         parseInt(words[1]),
-					Score:        parseInt(words[2]),
-					Deadline:     parseInt(words[3]),
-					Skills:       []*Skill{},
-					Working:      false,
-					Contributors: make(map[string]*Person),
+					Name:                 words[0],
+					Days:                 parseInt(words[1]),
+					Score:                parseInt(words[2]),
+					Deadline:             parseInt(words[3]),
+					Skills:               []*Skill{},
+					Working:              false,
+					Contributors:         make(map[string]*Person),
+					PossibleContributors: make(map[string]*Person),
 				}
 				skillCount = parseInt(words[4])
 			} else if skillCount > 0 {
@@ -111,7 +112,6 @@ func main() {
 	projects = append(projects, currProject)
 
 	sProjects := utils.Sort(projects, func(p *Project) int {
-		fmt.Printf("%s,%v\n", p.Name, p.evaluate())
 		return p.evaluate()
 	})
 
@@ -165,19 +165,18 @@ func main() {
 				})
 
 				if minMan != nil {
-					project.PossibleContributors = append(project.PossibleContributors, minMan)
+					project.PossibleContributors[skill.Name] = minMan
 				}
 
-				if len(project.PossibleContributors) == len(project.Skills) {
-					project.Working = true
-					running = true
-					for _, contributor := range project.PossibleContributors {
-						contributor.Working = true
-						project.Contributors[skill.Name] = contributor
-					}
-					project.PossibleContributors = []*Person{}
+			}
+			if len(project.PossibleContributors) == len(project.Skills) {
+				project.Working = true
+				running = true
+				for skillC, contributor := range project.PossibleContributors {
+					contributor.Working = true
+					project.Contributors[skillC] = contributor
 				}
-
+				project.PossibleContributors = make(map[string]*Person)
 			}
 
 		}
@@ -190,6 +189,12 @@ func main() {
 
 	}
 
-	fmt.Println(brojects)
+	fmt.Println(len(brojects))
+	for _, broject := range brojects {
+		fmt.Println(broject.Name)
+		for _, skill := range broject.Skills {
+			fmt.Println(broject.Contributors[skill.Name].Name)
+		}
+	}
 
 }
